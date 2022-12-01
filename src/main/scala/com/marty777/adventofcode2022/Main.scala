@@ -8,7 +8,7 @@ def usage = {
 	sbt "run [DAY] [INPUT FILE]"
 	
 	DAY			The advent day to run (1-25)
-	INPUT FILE		The path the input text file
+	INPUT FILE		The path to the input text file
 """);
 	sys.exit(0);
 }
@@ -24,11 +24,10 @@ def logo: String = {
 """
 }
 
-@main def AOC2015(day: Int, path: String) =
+@main def AOC2022(day: Int, path: String) =
 	println(logo)
 
-	val bldr = new StringBuilder(s"Starting Advent of Code 2015 day $day with input file $path")
-	println(bldr.toString)
+	println(s"Starting Advent of Code 2022 day $day with input file $path")
 	if(!Files.exists(Paths.get(path))) {
 		println(s"The input file $path could not be found");
 		usage;
