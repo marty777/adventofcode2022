@@ -9,20 +9,15 @@ object Day02Definitions {
 		case Rock, Paper, Scissors
 	enum Result:
 		case Win, Loss, Tie
-	case class GuideEntry(opponent: Shape, response:Shape, result:Result)
+	case class GuideEntry(opponent:Shape, response:Shape, result:Result)
 }
 object Day02 extends PuzzleDay[Seq[GuideEntry], Seq[GuideEntry], Int, Int] {
 	override def parse1(inputPath: String): Seq[GuideEntry] = readLines(inputPath).flatMap(parseGuideEntry1)
 	override def parse2(inputPath: String): Seq[GuideEntry] = readLines(inputPath).flatMap(parseGuideEntry2)
 	
-	override def part1(entries: Seq[GuideEntry]): Int = {
-		entries.map(roundScore).sum
-	}
-	
-	override def part2(entries: Seq[GuideEntry]): Int = {
-		entries.map(roundScore).sum
-	}
-	
+	override def part1(entries: Seq[GuideEntry]): Int = entries.map(roundScore).sum
+	override def part2(entries: Seq[GuideEntry]): Int = entries.map(roundScore).sum
+		
 	def abcToShape(abc:String):Shape = {
 		abc match {
 			case "A" => Shape.Rock
@@ -57,13 +52,11 @@ object Day02 extends PuzzleDay[Seq[GuideEntry], Seq[GuideEntry], Int, Int] {
 														case Shape.Paper	=> Result.Win 
 														case Shape.Scissors	=> Result.Loss
 													}
-			
 			case Shape.Paper 	=> response match 	{	
 														case Shape.Rock 	=> Result.Loss 
 														case Shape.Paper 	=> Result.Tie 
 														case Shape.Scissors	=> Result.Win
 													}
-			
 			case Shape.Scissors => response match 	{	
 														case Shape.Rock 	=> Result.Win 
 														case Shape.Paper 	=> Result.Loss 
@@ -109,8 +102,8 @@ object Day02 extends PuzzleDay[Seq[GuideEntry], Seq[GuideEntry], Int, Int] {
 		input match {
 			case entry(opponent, result) 	=> {
 													val opponentShape = abcToShape(opponent)
-													val matchResult = xyzToResult(result)
-													Some(GuideEntry(opponentShape,shapeFromResult(opponentShape, matchResult), matchResult))
+													val roundResult = xyzToResult(result)
+													Some(GuideEntry(opponentShape,shapeFromResult(opponentShape, roundResult), roundResult))
 												}
 			case _							=> 	None
 		}
@@ -132,9 +125,5 @@ object Day02 extends PuzzleDay[Seq[GuideEntry], Seq[GuideEntry], Int, Int] {
 		}
 	}
 	
-	def roundScore(entry:GuideEntry): Int = {
-		shapeScore(entry.response) + resultScore(entry.result)
-	}
-	
-	
+	def roundScore(entry:GuideEntry): Int = shapeScore(entry.response) + resultScore(entry.result)
 }
