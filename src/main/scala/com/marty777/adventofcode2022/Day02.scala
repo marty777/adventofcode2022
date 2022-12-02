@@ -46,63 +46,89 @@ object Day02 extends PuzzleDay[Seq[GuideEntry], Seq[GuideEntry], Int, Int] {
 			case "X" => Result.Loss
 			case "Y" => Result.Tie
 			case "Z" => Result.Win
-			case _	=> throw Exception(s"Unknown shape found: $xyz")
+			case _	=> throw Exception(s"Unknown result found: $xyz")
 		}
 	}
 	
 	def resultFromShapes(opponent:Shape, response:Shape): Result = {
 		opponent match {
-			case Shape.Rock 		=> if(response == Shape.Rock) then Result.Tie else if(response == Shape.Paper) then Result.Win else Result.Loss
-			case Shape.Paper 		=> if(response == Shape.Rock) then Result.Loss else if(response == Shape.Paper) then Result.Tie else Result.Win
-			case Shape.Scissors 	=> if(response == Shape.Rock) then Result.Win else if(response ==Shape.Paper) then Result.Loss else Result.Tie
+			case Shape.Rock 	=> response match 	{	
+														case Shape.Rock 	=> Result.Tie 
+														case Shape.Paper	=> Result.Win 
+														case Shape.Scissors	=> Result.Loss
+													}
+			
+			case Shape.Paper 	=> response match 	{	
+														case Shape.Rock 	=> Result.Loss 
+														case Shape.Paper 	=> Result.Tie 
+														case Shape.Scissors	=> Result.Win
+													}
+			
+			case Shape.Scissors => response match 	{	
+														case Shape.Rock 	=> Result.Win 
+														case Shape.Paper 	=> Result.Loss 
+														case Shape.Scissors	=> Result.Tie
+													}		
 		}
 	}
 	
 	def shapeFromResult(opponent:Shape, result:Result): Shape = {
 		opponent match {
-			case Shape.Rock 		=> if(result == Result.Loss) then Shape.Scissors else if(result == Result.Tie) then Shape.Rock else Shape.Paper
-			case Shape.Paper 		=> if(result == Result.Loss) then Shape.Rock else if(result == Result.Tie) then Shape.Paper else Shape.Scissors
-			case Shape.Scissors 	=> if(result == Result.Loss) then Shape.Paper else if(result == Result.Tie) then Shape.Scissors else Shape.Rock
+			case Shape.Rock 	=> result match {	
+													case Result.Loss	=> Shape.Scissors 
+													case Result.Tie 	=> Shape.Rock
+													case Result.Win 	=> Shape.Paper	
+												}
+			case Shape.Paper 	=> result match {	
+													case Result.Loss	=> Shape.Rock 
+													case Result.Tie 	=> Shape.Paper
+													case Result.Win 	=> Shape.Scissors	
+												}
+			case Shape.Scissors => result match {	
+													case Result.Loss	=> Shape.Paper 
+													case Result.Tie 	=> Shape.Scissors
+													case Result.Win 	=> Shape.Rock	
+												}
 		}
 	}
 	
 	def parseGuideEntry1(input: String): Option[GuideEntry] = {
 		val entry = "(.*) (.*)".r
 		input match {
-			case entry(opponent, response) => 	{
+			case entry(opponent, response)	=> 	{
 													val opponentShape = abcToShape(opponent)
 													val responseShape = xyzToShape(response)
 													Some(GuideEntry(opponentShape,responseShape, resultFromShapes(opponentShape, responseShape)))
 												}
-			case _				=> None
+			case _							=> 	None
 		}
 	}
 	
 	def parseGuideEntry2(input: String): Option[GuideEntry] = {
 		val entry = "(.*) (.*)".r
 		input match {
-			case entry(opponent, result) => 	{
+			case entry(opponent, result) 	=> {
 													val opponentShape = abcToShape(opponent)
 													val matchResult = xyzToResult(result)
 													Some(GuideEntry(opponentShape,shapeFromResult(opponentShape, matchResult), matchResult))
 												}
-			case _				=> None
+			case _							=> 	None
 		}
 	}
 	
 	def resultScore(result:Result): Int = {
 		result match {
-			case Result.Win	=> 6
-			case Result.Tie	=> 3
+			case Result.Win		=> 6
+			case Result.Tie		=> 3
 			case Result.Loss	=> 0
 		}
 	}
 	
 	def shapeScore(shape:Shape): Int = {
 		shape match {
-			case Shape.Rock		=> 1
+			case Shape.Rock			=> 1
 			case Shape.Paper		=> 2
-			case Shape.Scissors	=> 3
+			case Shape.Scissors		=> 3
 		}
 	}
 	
