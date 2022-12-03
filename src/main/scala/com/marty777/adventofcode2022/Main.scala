@@ -41,6 +41,7 @@ def logo: String = {
 	val puzzle = day match {
 		case 1 => Day01
 		case 2 => Day02
+		case 3 => Day03
 		case _ => {
 			println(s"Puzzle day $day has not been implemented yet")
 			usage
