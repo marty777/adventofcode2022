@@ -15,7 +15,7 @@ move 3 from 1 to 3
 move 2 from 2 to 1
 move 1 from 1 to 2""".split("\n").toSeq
 
-	test("Day05 Part 1") {
+	test("Day05 Part 1") { 
 		assert(Day05.part1(sampleInput.takeRight(sampleInput.size - 1)) == "CMZ")
 	}
 	
