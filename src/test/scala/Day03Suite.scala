@@ -3,6 +3,9 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class Day03Suite extends AnyFunSuite {
 
+	// line break consistant with the line formatting of this file
+	val fileNewline = """
+"""
 	val sampleInput:Seq[String] = """
 	vJrwpWtwJgWrhcsFMMfFFhFp
 	jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
@@ -10,7 +13,7 @@ class Day03Suite extends AnyFunSuite {
 	wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
 	ttgJtRGJQctTZtZT
 	CrZsJsPPZsGzwwsLwLmpwMDw
-	""".trim.split("\n").toSeq.map(_.trim)
+	""".trim.split(fileNewline).toSeq.map(_.trim)
 
 	test("Day03 Part 1") {
 		assert(Day03.part1(sampleInput) == 157)

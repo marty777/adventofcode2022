@@ -3,6 +3,9 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class Day04Suite extends AnyFunSuite {
 
+	// line break consistant with the line formatting of this file
+	val fileNewline = """
+"""
 	val sampleInput:Seq[String] = """
 	2-4,6-8
 	2-3,4-5
@@ -10,7 +13,7 @@ class Day04Suite extends AnyFunSuite {
 	2-8,3-7
 	6-6,4-6
 	2-6,4-8
-	""".trim.split("\n").toSeq.map(_.trim)
+	""".trim.split(fileNewline).toSeq.map(_.trim)
 
 	test("Day04 Part 1") {
 		assert(Day04.part1(sampleInput.flatMap(Day04.parseRangePair)) == 2)

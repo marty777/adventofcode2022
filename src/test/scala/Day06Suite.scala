@@ -3,10 +3,12 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class Day06Suite extends AnyFunSuite {
 
-	// line breaks cause problems if this file isn't unix-lf formatted
+	// line break consistant with the line formatting of this file
+	val fileNewline = """
+"""
 	val sampleInput:Seq[String] = """
     zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw
-	""".trim.split("\n").toSeq
+	""".trim.split(fileNewline).toSeq
 
 	test("Day06 Part 1") {
 		assert(Day06.part1(sampleInput) == 11)

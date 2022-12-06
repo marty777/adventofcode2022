@@ -2,7 +2,10 @@ package com.marty777.adventofcode2022
 import org.scalatest.funsuite.AnyFunSuite
 
 class Day01Suite extends AnyFunSuite {
-
+	
+	// line break consistant with the line formatting of this file
+	val fileNewline = """
+"""
 	val sampleInput:Seq[String] = """
 	1000
 	2000
@@ -18,7 +21,7 @@ class Day01Suite extends AnyFunSuite {
 	9000
 
 	10000
-	""".trim.split("\n").toSeq.map(_.trim)
+	""".trim.split(fileNewline).toSeq.map(_.trim)
 
 	test("Day01 Part 1") {
 		assert(Day01.part1(Day01.parseElves(sampleInput)) == 24000)

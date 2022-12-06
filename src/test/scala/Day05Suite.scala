@@ -3,7 +3,9 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class Day05Suite extends AnyFunSuite {
 
-	// line breaks cause problems if this file isn't unix-lf formatted
+	// line break consistant with the line formatting of this file
+	val fileNewline = """
+"""
 	val sampleInput:Seq[String] = """
     [D]    
 [N] [C]    
@@ -13,7 +15,7 @@ class Day05Suite extends AnyFunSuite {
 move 1 from 2 to 1
 move 3 from 1 to 3
 move 2 from 2 to 1
-move 1 from 1 to 2""".split("\n").toSeq
+move 1 from 1 to 2""".split(fileNewline).toSeq
 
 	test("Day05 Part 1") { 
 		assert(Day05.part1(sampleInput.takeRight(sampleInput.size - 1)) == "CMZ")
