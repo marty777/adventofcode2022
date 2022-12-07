@@ -5,10 +5,7 @@ import com.marty777.adventofcode2022.PuzzleDay
 import com.marty777.util.FileLines.readLines
 
 object Day07Definitions {
-	
-	case class FileNode(symbol:String, size:Int, parentNode:String)
-	case class DirNode(symbol:String, parentNode:String, var childFiles:Seq[FileNode])
-	
+	case class DirNode(symbol:String, parentNode:String, var childFileSum:Int)
 }
 
 object Day07 extends PuzzleDay[Map[String, DirNode], Map[String, DirNode], Int, Int] {
@@ -24,13 +21,9 @@ object Day07 extends PuzzleDay[Map[String, DirNode], Map[String, DirNode], Int, 
 	}
 	
 	def dirSize(nodes: Map[String, DirNode], symbol:String): Int = {
-		var childFileSum = nodes(symbol).childFiles.map(_.size).sum
 		var childDirs = nodes.toSeq.filter((k,x) => x.parentNode == symbol).map(_._1)
-		var childSum:Int = 0
-		for(childDir <- childDirs) {
-			childSum += dirSize(nodes, childDir)
-		}
-		childFileSum + childSum		
+		val childDirSum = childDirs.foldLeft(0){_ + dirSize(nodes, _)}
+		nodes(symbol).childFileSum + childDirSum	
 	}
 	
 	def parseLines(lines:Seq[String]): Map[String, DirNode] = {
@@ -38,7 +31,7 @@ object Day07 extends PuzzleDay[Map[String, DirNode], Map[String, DirNode], Int, 
 		var fileNodes:Map[String, DirNode] = Map()
 		val cd = raw"""\$$ cd (.*)""".r
 		// add root node
-		fileNodes = fileNodes.updated("/", DirNode("/", "", Seq()))
+		fileNodes = fileNodes.updated("/", DirNode("/", "", 0))
 		var parentSymbol = ""
 		while(index < lines.size) {
 			lines(index) match {
@@ -48,6 +41,7 @@ object Day07 extends PuzzleDay[Map[String, DirNode], Map[String, DirNode], Int, 
 						index += 1
 					}
 					else {
+						// this is a mess but at least it works
 						index = index + 2
 						if(symbol == "/") {
 							parentSymbol = "/"
@@ -67,10 +61,10 @@ object Day07 extends PuzzleDay[Map[String, DirNode], Map[String, DirNode], Int, 
 								if(parentSymbol == "/") {
 									newKey = "/" + split(1)
 								}
-								fileNodes = fileNodes.updated(newKey, DirNode(split(1), parentSymbol, Seq()))
+								fileNodes = fileNodes.updated(newKey, DirNode(split(1), parentSymbol, 0))
 							}
 							else {
-								fileNodes(parentSymbol).childFiles =  fileNodes(parentSymbol).childFiles.appended(FileNode(split(1), split(0).toInt, parentSymbol))
+								fileNodes(parentSymbol).childFileSum +=  split(0).toInt
 							}
 							index += 1
 						}
@@ -78,8 +72,6 @@ object Day07 extends PuzzleDay[Map[String, DirNode], Map[String, DirNode], Int, 
 				}
 			}
 		}
-		
 		fileNodes
 	}
-	
 }
