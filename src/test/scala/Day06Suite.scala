@@ -3,7 +3,7 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class Day06Suite extends AnyFunSuite {
 
-	// line break consistant with the line formatting of this file
+	// line break consistent with the line formatting of this file
 	val fileNewline = """
 """
 	val sampleInput:Seq[String] = """
@@ -14,7 +14,7 @@ class Day06Suite extends AnyFunSuite {
 		assert(Day06.part1(sampleInput) == 11)
 	}
 	
-	test("Day05 Part 2") {
+	test("Day06 Part 2") {
 		assert(Day06.part2(sampleInput) == 26)
 	}
 }

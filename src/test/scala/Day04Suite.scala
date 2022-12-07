@@ -3,7 +3,7 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class Day04Suite extends AnyFunSuite {
 
-	// line break consistant with the line formatting of this file
+	// line break consistent with the line formatting of this file
 	val fileNewline = """
 """
 	val sampleInput:Seq[String] = """
