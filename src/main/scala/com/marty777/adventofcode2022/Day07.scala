@@ -5,7 +5,7 @@ import com.marty777.adventofcode2022.PuzzleDay
 import com.marty777.util.FileLines.readLines
 
 object Day07Definitions {
-	case class DirNode(symbol:String, parentNode:String, var childFileSum:Int)
+	case class DirNode(symbol:String, parentNode:String, var childFileSum:Int = 0, var totalSum:Int = -1)
 }
 
 object Day07 extends PuzzleDay[Map[String, DirNode], Map[String, DirNode], Int, Int] {
@@ -13,17 +13,24 @@ object Day07 extends PuzzleDay[Map[String, DirNode], Map[String, DirNode], Int, 
 	override def parse2(inputPath: String): Map[String, DirNode] = parse1(inputPath)
 	
 	override def part1(nodes: Map[String, DirNode]): Int = {
-		nodes.toSeq.filter((key,value) => dirSize(nodes, key) <= 100000 ).map((key, dir) => dirSize(nodes,key)).sum
+		nodes.keys.toSeq.map(key => dirSize(nodes, key)).filter(size => size <= 100000).sum
 	}
 	override def part2(nodes: Map[String, DirNode]): Int = {
 		var minSize = 30000000 - (70000000 - dirSize(nodes, "/"))
-		nodes.toSeq.filter((key,value) => dirSize(nodes, key) >= minSize ).map((key,value) => dirSize(nodes, key)).sorted.head
+		nodes.keys.map(dirSize(nodes, _)).filter(size => size >= minSize).toSeq.sorted.head
 	}
 	
 	def dirSize(nodes: Map[String, DirNode], symbol:String): Int = {
-		var childDirs = nodes.toSeq.filter((k,x) => x.parentNode == symbol).map(_._1)
-		val childDirSum = childDirs.foldLeft(0){_ + dirSize(nodes, _)}
-		nodes(symbol).childFileSum + childDirSum	
+		if(nodes(symbol).totalSum >= 0) {
+			nodes(symbol).totalSum
+		}
+		else {
+			var childDirs = nodes.toSeq.filter((k,x) => x.parentNode == symbol).map(_._1)
+			val childDirSum = childDirs.foldLeft(0){_ + dirSize(nodes, _)}
+			val totalSize = nodes(symbol).childFileSum + childDirSum	
+			nodes(symbol).totalSum = totalSize
+			totalSize
+		}
 	}
 	
 	def parseLines(lines:Seq[String]): Map[String, DirNode] = {
@@ -31,7 +38,7 @@ object Day07 extends PuzzleDay[Map[String, DirNode], Map[String, DirNode], Int, 
 		var fileNodes:Map[String, DirNode] = Map()
 		val cd = raw"""\$$ cd (.*)""".r
 		// add root node
-		fileNodes = fileNodes.updated("/", DirNode("/", "", 0))
+		fileNodes = fileNodes.updated("/", DirNode("/", ""))
 		var parentSymbol = ""
 		while(index < lines.size) {
 			lines(index) match {
@@ -61,7 +68,7 @@ object Day07 extends PuzzleDay[Map[String, DirNode], Map[String, DirNode], Int, 
 								if(parentSymbol == "/") {
 									newKey = "/" + split(1)
 								}
-								fileNodes = fileNodes.updated(newKey, DirNode(split(1), parentSymbol, 0))
+								fileNodes = fileNodes.updated(newKey, DirNode(split(1), parentSymbol))
 							}
 							else {
 								fileNodes(parentSymbol).childFileSum +=  split(0).toInt
