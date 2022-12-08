@@ -15,7 +15,6 @@ object Day08 extends PuzzleDay[Seq[Seq[Int]], Seq[Seq[Int]], Int, Int] {
 	
 	override def part1(grid: Seq[Seq[Int]]): Int = {
 		Direction.values.foldLeft(Set():Set[(Int, Int)])(_ union visibleTrees(grid, _)).size
-		
 	}
 	override def part2(grid: Seq[Seq[Int]]): Int = {
 		var treeScoreMax = 0
@@ -131,11 +130,6 @@ object Day08 extends PuzzleDay[Seq[Seq[Int]], Seq[Seq[Int]], Int, Int] {
 	}
 	
 	def parseLines(lines:Seq[String]): Seq[Seq[Int]] = {
-		var dim = lines.size
-		var grid:Seq[Seq[Int]] = Seq()
-		for(line <- lines) {
-			grid = grid :+ line.toCharArray.map(_.toString.toInt)
-		}
-		grid
+		lines.foldLeft(Seq.newBuilder[Seq[Int]])(_ += _.toCharArray.map(_.toString.toInt).toSeq ).result()
 	}
 }
