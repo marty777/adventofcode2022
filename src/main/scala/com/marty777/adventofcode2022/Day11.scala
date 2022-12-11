@@ -7,7 +7,7 @@ import scala.math.BigInt
 
 object Day11Definitions {
 	case class Monkey(id: Int, op:String, opVal:Int, opValIsOld:Boolean, testDivisor:Int, trueThrow:Int, falseThrow:Int, var inspections:Int = 0)
-	case class Item(id: Int, var monkeyId:Int, var value:BigInt, var order:Int)
+	case class Item(id: Int, var monkeyId:Int, var value:BigInt)
 	case class State(monkeys:Seq[Monkey], items:Seq[Item], gcd:Int, var round:Int = 0)
 }
 
@@ -16,14 +16,14 @@ object Day11 extends PuzzleDay[State, State, BigInt, BigInt] {
 	override def parse2(inputPath: String): State = parse1(inputPath)
 	
 	override def part1(state: State): BigInt = {
-		for(round <- 1 to 20) {
+		while(state.round < 20) {
 			runMonkeyRound(state, part2 = false)
 		}
 		state.monkeys.map(_.inspections).sorted.reverse.take(2).foldLeft(1:BigInt)(_ * _)
 	}
 	
 	override def part2(state: State): BigInt = {
-		for(round <- 1 to 10000) {
+		while(state.round < 10000) {
 			runMonkeyRound(state, part2 = true)
 		}
 		state.monkeys.map(_.inspections).sorted.reverse.take(2).foldLeft(1:BigInt)(_ * _)
@@ -32,7 +32,7 @@ object Day11 extends PuzzleDay[State, State, BigInt, BigInt] {
 	def runMonkeyRound(state:State, part2:Boolean = false): Unit = {
 		state.round = state.round + 1
 		for(i <- 0 until state.monkeys.size) {
-			var items = state.items.filter(x => x.monkeyId == i).sortBy(_.order)
+			var items = state.items.filter(x => x.monkeyId == i)
 			for(j <- 0 until items.size) {
 				state.monkeys(i).inspections += 1
 				var itemValue = items(j).value
@@ -56,28 +56,10 @@ object Day11 extends PuzzleDay[State, State, BigInt, BigInt] {
 				}
 				state.items(items(j).id).value = itemValue
 				if(itemValue % state.monkeys(i).testDivisor == 0) {
-					var order = 0
-					val orders = state.items.filter(_.monkeyId == state.monkeys(i).trueThrow).map(_.order)
-					if(orders.size == 0) {
-						order = 0
-					}
-					else {
-						order = orders.max + 1
-					}
 					state.items(items(j).id).monkeyId = state.monkeys(i).trueThrow
-					state.items(items(j).id).order = order
 				}
 				else {
-					var order = 0
-					val orders = state.items.filter(_.monkeyId == state.monkeys(i).trueThrow).map(_.order)
-					if(orders.size == 0) {
-						order = 0
-					}
-					else {
-						order = orders.max + 1
-					}
 					state.items(items(j).id).monkeyId = state.monkeys(i).falseThrow
-					state.items(items(j).id).order = order
 				}
 			}
 		}
@@ -108,7 +90,7 @@ object Day11 extends PuzzleDay[State, State, BigInt, BigInt] {
 					case startingItems(itemList) => {
 						val theItems = itemList.split(", ").map(BigInt(_))
 						for(i <- 0 until theItems.size) {
-							items = items :+ Item(items.size, monkeyId, theItems(i), i)
+							items = items :+ Item(items.size, monkeyId, theItems(i))
 						}
 						index += 1
 					}
