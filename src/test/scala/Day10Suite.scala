@@ -162,7 +162,7 @@ noop
 ######......######......######......####
 #######.......#######.......#######.....""".replace(fileNewline, "\n")
 
-	test("Day09 Part 1") {
+	test("Day10 Part 1") {
 		assert(Day10.part1(sampleInput.flatMap(Day10.parseLine)) == 13140)
 	}
 	

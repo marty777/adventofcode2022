@@ -7,7 +7,7 @@ import scala.math.BigInt
 
 object Day11Definitions {
 	case class Monkey(id: Int, op:String, opVal:Int, opValIsOld:Boolean, testDivisor:Int, trueThrow:Int, falseThrow:Int, var inspections:Int = 0)
-	case class Item(id: Int, var monkeyId:Int, var value:BigInt)
+	case class Item(id: Int, var monkeyId:Int, var value:Long)
 	case class State(monkeys:Seq[Monkey], items:Seq[Item], gcd:Int, var round:Int = 0)
 }
 
@@ -19,14 +19,14 @@ object Day11 extends PuzzleDay[State, State, BigInt, BigInt] {
 		while(state.round < 20) {
 			runMonkeyRound(state, part2 = false)
 		}
-		state.monkeys.map(_.inspections).sorted.reverse.take(2).foldLeft(1:BigInt)(_ * _)
+		state.monkeys.map(_.inspections).sorted.reverse.take(2).foldLeft(1:Long)(_ * _)
 	}
 	
 	override def part2(state: State): BigInt = {
 		while(state.round < 10000) {
 			runMonkeyRound(state, part2 = true)
 		}
-		state.monkeys.map(_.inspections).sorted.reverse.take(2).foldLeft(1:BigInt)(_ * _)
+		state.monkeys.map(_.inspections).sorted.reverse.take(2).foldLeft(1:Long)(_ * _)
 	}
 	
 	def runMonkeyRound(state:State, part2:Boolean = false): Unit = {
@@ -88,7 +88,7 @@ object Day11 extends PuzzleDay[State, State, BigInt, BigInt] {
 			while(!doneMonkey) {
 				lines(index) match {
 					case startingItems(itemList) => {
-						val theItems = itemList.split(", ").map(BigInt(_))
+						val theItems = itemList.split(", ").map(_.toLong)
 						for(i <- 0 until theItems.size) {
 							items = items :+ Item(items.size, monkeyId, theItems(i))
 						}
