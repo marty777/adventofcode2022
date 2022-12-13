@@ -7,126 +7,110 @@ import com.marty777.util.FileLines.readLines
 object Day12Definitions {
 	case class Coord(x:Int, y:Int)
 	case class State(grid:Seq[Seq[Char]], width:Int, height:Int, startCoord:Coord, endCoord:Coord)
-	case class DNode(coord:Coord, height:Char, var dist:Int)
 }
 
-object Day12 extends PuzzleDay[Seq[String], Seq[String], Int, Int] {
-	override def parse1(inputPath: String): Seq[String] = readLines(inputPath)
-	override def parse2(inputPath: String): Seq[String] = parse1(inputPath)
+object Day12 extends PuzzleDay[State, State, Int, Int] {
+	override def parse1(inputPath: String): State = parseLines(readLines(inputPath))
+	override def parse2(inputPath: String): State = parse1(inputPath)
 	
-	override def part1(lines: Seq[String]): Int = {
-		dijkstra(parseLines(lines), isPart2 = false)
+	override def part1(state: State): Int = {
+		dijkstra(state, isPart2 = false)
 	}
 	
-	override def part2(lines: Seq[String]): Int = {
-		dijkstra(parseLines(lines), isPart2 = true)
-	}
-	
-	def parseLines(lines:Seq[String]): State = {
-		var grid = lines.map(_.replace("S", "a")).map(_.replace("E", "z")).foldLeft(Seq.newBuilder[Seq[Char]])(_ += _.toCharArray.toSeq).result()
-		var startX = 0
-		var startY = 0
-		var endX = 0
-		var endY = 0
-		val height = grid.size
-		val width = grid(0).size
-		for(i <- 0 until lines.size) {
-			val s = lines(i).indexOf("S")
-			val e = lines(i).indexOf("E")
-			if(s != -1) {
-				startY = i
-				startX = s
-			}
-			if(e != -1) {
-				endY = i
-				endX = e
-			}
-		}
-		State(grid, width, height, Coord(startX,startY), Coord(endX,endY))
+	override def part2(state: State): Int = {
+		dijkstra(state, isPart2 = true)
 	}
 	
 	def dijkstra(state:State, isPart2:Boolean = false): Int = {
-		var frontier:scala.collection.mutable.Map[Coord, DNode] = scala.collection.mutable.Map()
-		var frontierNext:scala.collection.mutable.Map[Coord, DNode] = scala.collection.mutable.Map()
-		var explored:scala.collection.mutable.Map[Coord, DNode] = scala.collection.mutable.Map()
+		val frontier:scala.collection.mutable.Map[Coord, Int] = scala.collection.mutable.Map()
+		val frontierNext:scala.collection.mutable.Map[Coord, Int] = scala.collection.mutable.Map()
+		val explored:scala.collection.mutable.Map[Coord, Int] = scala.collection.mutable.Map()
+		val moves = List((0,1), (1,0), (0,-1), (-1,0))
 		if(isPart2) {
-			// add the end node
-			frontierNext(state.endCoord) = DNode(state.endCoord, state.grid(state.endCoord.y)(state.endCoord.x), 0)
+			// add the end node at distance 0
+			frontierNext(state.endCoord) = 0
 		}
 		else {
-			// add the start node
-			frontierNext(state.startCoord) = DNode(state.startCoord, state.grid(state.startCoord.y)(state.startCoord.x), 0)
+			// add the start node at distance 0
+			frontierNext(state.startCoord) = 0
 		}
 		while(frontierNext.size > 0) {
 			frontier.clear
 			for(coord <- frontierNext.keys) {
-				var node = frontierNext(coord)
-				frontier(coord) = node
+				frontier(coord) = frontierNext(coord)
 			}
 			frontierNext.clear
 			for(coord <- frontier.keys) {
-				var node = frontier(coord)
-				if(explored.contains(coord)) {
-					if(explored(coord).dist > frontier(coord).dist) {
-						explored(coord).dist = frontier(coord).dist
-					}
+				if(betterDist(explored, coord, frontier(coord))) {
+					explored(coord) = frontier(coord)
 				}
-				else {
-					explored(coord) = DNode(coord, state.grid(coord.y)(coord.x), frontier(coord).dist)
-				}
-				val nextDist = node.dist + 1
-				for(i <- 0 to 3) {
-					var xd = 0
-					var yd = 0
-					if(i == 0) {
-						yd = 1
+				val nextDist = frontier(coord) + 1
+				for(move <- moves) {
+					val nextCoord = Coord(coord.x + move._1, coord.y + move._2)
+					if(inBounds(state, nextCoord)) {
+						val delta = height(state, nextCoord) - height(state, coord)
+						if(allowedDelta(delta, isPart2) 
+							&& betterDist(explored,nextCoord,nextDist) 
+							&& betterDist(frontierNext, nextCoord, nextDist)) {
+							frontierNext(nextCoord) = nextDist
+						}
 					}
-					if(i == 1) {
-						xd = 1
-					}
-					if(i == 2) {
-						yd = -1
-					}
-					if(i == 3) {
-						xd = -1
-					}
-					val nextCoord = Coord(node.coord.x + xd, node.coord.y + yd)
-					var delta = 0
-					var addNext = true
-					if(nextCoord.x < 0 || nextCoord.x >= state.width || nextCoord.y < 0 || nextCoord.y >= state.height) {
-						addNext = false
-					}
-					else {
-						delta = state.grid(nextCoord.y)(nextCoord.x) - state.grid(node.coord.y)(node.coord.x)
-					}
-					if(addNext && ((!isPart2 && delta > 1) || (isPart2 && delta < -1) )) {
-						addNext = false
-					}
-					if(addNext && (explored.contains(nextCoord) && explored(nextCoord).dist <= nextDist)) {
-						addNext = false
-					}
-					if(addNext && (frontierNext.contains(nextCoord) && frontierNext(nextCoord).dist <= nextDist)) {
-						addNext = false
-					}
-					if(addNext) {
-						frontierNext(nextCoord) = DNode(nextCoord, state.grid(nextCoord.y)(nextCoord.x), nextDist)
-					}
-					
 				}
 			}
 		}
 		
 		if(isPart2) {
-			explored.toSeq.map(_._2).filter(n => n.height == 'a').sortWith(_.dist < _.dist)(0).dist
+			val as = explored.toSeq.filter((coord,node) => height(state, coord) == 'a').map(_._2)
+			if(as.size < 1) {
+				throw Exception("Couldn't find any paths")
+			}
+			else {
+				as.sorted.head
+			}
 		}
 		else {
 			if(!explored.contains(state.endCoord)) {
 				throw Exception("Couldn't reach the end node")
 			}
 			else {
-				explored(state.endCoord).dist
+				explored(state.endCoord)
 			}
 		}
 	}
 	
+	// dijkstra helper functions
+	def height(state: State, coord:Coord): Char = state.grid(coord.y)(coord.x)
+	def inBounds(state:State, coord:Coord): Boolean = !(coord.x < 0 || coord.x >= state.width || coord.y < 0 || coord.y >= state.height)
+	def betterDist(collection: scala.collection.mutable.Map[Coord, Int], coord:Coord, newDist:Int): Boolean = {
+		if(!collection.contains(coord)) {
+			true
+		}
+		else {
+			collection(coord) > newDist
+		}
+	}
+	def allowedDelta(delta:Int, isPart2:Boolean):Boolean = (isPart2 && delta >= -1) || (!isPart2 && delta <= 1)
+
+	def parseLines(lines:Seq[String]): State = {
+		var grid = lines.map(_.replace("S", "a")).map(_.replace("E", "z")).foldLeft(Seq.newBuilder[Seq[Char]])(_ += _.toCharArray.toSeq).result()
+		if(grid.size == 0 || grid(0).size == 0) {
+			throw Exception("Grid parsed with one or both dimensions 0")
+		}
+		var start = Coord(0,0)
+		var end = Coord(0,0)
+		for(i <- 0 until lines.size) {
+			val s = lines(i).indexOf("S")
+			val e = lines(i).indexOf("E")
+			if(s != -1) {
+				start = Coord(s,i)
+			}
+			if(e != -1) {
+				end = Coord(e,i)
+			}
+		}
+		if(start == Coord(0,0) && end == Coord(0,0)) {
+			throw Exception("Unable to determine start and end points when parsing grid")
+		}
+		State(grid, grid(0).size, grid.size, start, end)
+	}
 }

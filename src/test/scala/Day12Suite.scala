@@ -15,10 +15,10 @@ class Day12Suite extends AnyFunSuite {
 	""".trim.split(fileNewline).map(_.trim).toSeq
 
 	test("Day12 Part 1") {
-		assert(Day12.part1(sampleInput) == 31)
+		assert(Day12.part1(Day12.parseLines(sampleInput)) == 31)
 	}
 	
 	test("Day12 Part 2") {
-		assert(Day12.part2(sampleInput) == 29)
+		assert(Day12.part2(Day12.parseLines(sampleInput)) == 29)
 	}
 }
