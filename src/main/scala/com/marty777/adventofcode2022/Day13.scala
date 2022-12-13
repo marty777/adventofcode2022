@@ -7,8 +7,6 @@ import com.marty777.util.FileLines.readLines
 object Day13Definitions {
 	enum Comparison: 
 		case LT, GT, EQ
-	case class Coord(x:Int, y:Int)
-	case class State(grid:Seq[Seq[Char]], width:Int, height:Int, startCoord:Coord, endCoord:Coord)
 }
 
 object Day13 extends PuzzleDay[Seq[String], Seq[String], Int, Int] {
@@ -17,21 +15,15 @@ object Day13 extends PuzzleDay[Seq[String], Seq[String], Int, Int] {
 	
 	override def part1(lines: Seq[String]): Int = {
 		lines.sliding(2,2).toList.zipWithIndex.foldLeft(0)((acc,entry) => {
-			if(comparePackets(entry._1(0), entry._1(1)) == Comparison.LT) {
-				acc + (entry._2 + 1)
-			}
-			else {
-				acc
-			}
+			if(comparePackets(entry._1(0), entry._1(1)) == Comparison.LT) acc + (entry._2 + 1)
+			else acc
 		})
 	}
 	
 	override def part2(lines: Seq[String]): Int = {
 		var extendedLines = lines :+ "[[2]]" :+ "[[6]]"
 		extendedLines.sortWith(comparePackets(_,_) == Comparison.LT).zipWithIndex.foldLeft(1)((acc, entry) => {
-			if(entry._1 == "[[2]]" || entry._1 == "[[6]]") {
-				acc * (entry._2 + 1)
-			}
+			if(entry._1 == "[[2]]" || entry._1 == "[[6]]") acc * (entry._2 + 1)
 			else acc
 		})
 	}
@@ -100,7 +92,7 @@ object Day13 extends PuzzleDay[Seq[String], Seq[String], Int, Int] {
 					index += 1
 				}
 				if(comp == Comparison.EQ || comp == Comparison.LT) comp = Comparison.LT
-				else comp =Comparison.GT
+				else comp = Comparison.GT
 			}
 			else {
 				while(index < leftList.size && comp == Comparison.EQ) {
