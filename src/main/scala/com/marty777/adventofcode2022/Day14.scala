@@ -5,10 +5,8 @@ import com.marty777.adventofcode2022.PuzzleDay
 import com.marty777.util.FileLines.readLines
 
 object Day14Definitions {
-	enum Comparison: 
-		case LT, GT, EQ
 	case class Coord(x:Int, y:Int)
-	case class Grid(rocks:collection.mutable.Map[Coord, Boolean], minCoord:Coord, maxCoord:Coord)
+	case class Grid(rocks:collection.mutable.Map[Coord, Boolean], maxY:Int)
 }
 
 object Day14 extends PuzzleDay[Grid, Grid, Int, Int] {
@@ -23,44 +21,51 @@ object Day14 extends PuzzleDay[Grid, Grid, Int, Int] {
 		val sand:collection.mutable.Map[Coord, Boolean] = collection.mutable.Map()
 		var abyss = false
 		var blockage = false
-		var maxY = grid.maxCoord.y
+		val abyssY = grid.maxY + 2
+		val baseY = grid.maxY + 1 // the maximum depth a grain can reach if there's a floor.
 		var grains = 0
+		var downCoord = Coord(0,0)
+		var leftCoord = Coord(0,0)
+		var rightCoord = Coord(0,0)
 		while(!abyss && !blockage) {
 			grains += 1
 			var sandCoord:Coord = sandStart
 			var moved = true
 			var grainDone = false
 			while(moved) {
+				downCoord = Coord(sandCoord.x, sandCoord.y + 1)
+				leftCoord = Coord(sandCoord.x-1, sandCoord.y + 1)
+				rightCoord = Coord(sandCoord.x+1, sandCoord.y + 1)
 				// comes to rest on the base floor
-				if(!withAbyss && sandCoord.y == maxY + 1) {
+				if(!withAbyss && sandCoord.y == baseY) {
 					moved = false
 				}
 				// falling
-				else if(!gridNotEmpty(grid.rocks, Coord(sandCoord.x, sandCoord.y + 1)) && !gridNotEmpty(sand,Coord(sandCoord.x, sandCoord.y + 1))) {
+				else if(!gridNotEmpty(grid.rocks, downCoord) && !gridNotEmpty(sand, downCoord)) {
 					moved = true
-					sandCoord = Coord(sandCoord.x, sandCoord.y + 1)
+					sandCoord = downCoord
 				}
 				// rolling left
-				else if(!gridNotEmpty(grid.rocks, Coord(sandCoord.x-1, sandCoord.y + 1)) && !gridNotEmpty(sand,Coord(sandCoord.x-1, sandCoord.y + 1))) {
+				else if(!gridNotEmpty(grid.rocks, leftCoord) && !gridNotEmpty(sand, leftCoord)) {
 					moved = true
-					sandCoord = Coord(sandCoord.x-1, sandCoord.y + 1)
+					sandCoord = leftCoord
 				}
 				// rolling right
-				else if(!gridNotEmpty(grid.rocks, Coord(sandCoord.x+1, sandCoord.y + 1)) && !gridNotEmpty(sand,Coord(sandCoord.x+1, sandCoord.y + 1))) {
+				else if(!gridNotEmpty(grid.rocks, rightCoord) && !gridNotEmpty(sand, rightCoord)) {
 					moved = true
-					sandCoord = Coord(sandCoord.x+1, sandCoord.y + 1)
+					sandCoord = rightCoord
 				}
 				// comes to rest
 				else {
 					moved = false
 				}
-				// heading to the abyss.stop updating
-				if(sandCoord.y >= maxY+2) {
+				// heading to the abyss. stop updating
+				if(sandCoord.y == abyssY) {
 					moved = false
 				}
 			}
 			
-			if(sandCoord.y >= maxY+2) {
+			if(sandCoord.y == abyssY) {
 				abyss = true
 				// the current grain won't come to rest
 				grains -= 1
@@ -69,7 +74,7 @@ object Day14 extends PuzzleDay[Grid, Grid, Int, Int] {
 				blockage = true
 			}
 			else {
-				sand(Coord(sandCoord.x, sandCoord.y)) = true
+				sand(sandCoord) = true
 			}
 		}
 		grains
@@ -81,10 +86,7 @@ object Day14 extends PuzzleDay[Grid, Grid, Int, Int] {
 	}
 	
 	def parseLines(lines:Seq[String]) = {
-		val grid1:collection.mutable.Map[Coord, Boolean] = collection.mutable.Map()
-		var minX = 0
-		var minY = 0
-		var maxX = 0
+		val rocks:collection.mutable.Map[Coord, Boolean] = collection.mutable.Map()
 		var maxY = 0
 		for(line <- lines) {
 			var points = line.split(" -> ").map( str => Coord(str.split(",")(0).toInt, str.split(",")(1).toInt) )
@@ -94,34 +96,33 @@ object Day14 extends PuzzleDay[Grid, Grid, Int, Int] {
 				if(p1.x == p2.x) {
 					if(p1.y < p2.y) {
 						for(y <- p1.y to p2.y) {
-							grid1(Coord(p1.x, y)) = true
+							rocks(Coord(p1.x, y)) = true
 						}
 					}
 					else {
 						for(y <- p2.y to p1.y) {
-							grid1(Coord(p1.x, y)) = true
+							rocks(Coord(p1.x, y)) = true
 						}
 					}
 				}
 				else {
 					if(p1.x < p2.x) {
 						for(x <- p1.x to p2.x) {
-							grid1(Coord(x,p1.y)) = true
+							rocks(Coord(x,p1.y)) = true
 						}
 					}
 					else {
 						for(x <- p2.x to p1.x) {
-							grid1(Coord(x, p1.y)) = true
+							rocks(Coord(x, p1.y)) = true
 						}
 					}
 				}
 			}
 		}
-		minX = grid1.keys.toSeq.sortWith(_.x < _.x).toSeq.head.x
-		maxX = grid1.keys.toSeq.sortWith(_.x > _.x).toSeq.head.x
-		minY = grid1.keys.toSeq.sortWith(_.y < _.y).toSeq.head.y
-		maxY = grid1.keys.toSeq.sortWith(_.y > _.y).toSeq.head.y
-		Grid(grid1, Coord(minX, minY), Coord(maxX, maxY))
+		maxY = rocks.keys.toSeq.sortWith(_.y > _.y).toSeq.head.y
+		// the rocks map no longer needs to be updated and should probably
+		// be converted to an immutable map, but eh.
+		Grid(rocks, maxY)
 	}	
 }
 

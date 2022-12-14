@@ -76,8 +76,8 @@ object Day13 extends PuzzleDay[Seq[String], Seq[String], Int, Int] {
 		else {
 			var comp = Comparison.EQ
 			var index = 0
-			val leftList = toSubPackets(left.substring(0, left.length))
-			val rightList = toSubPackets(right.substring(0, right.length))
+			val leftList = toSubPackets(left)
+			val rightList = toSubPackets(right)
 			if(leftList.size > rightList.size) {
 				while(index < rightList.size && comp == Comparison.EQ) {
 					comp = comparePackets(leftList(index), rightList(index))
