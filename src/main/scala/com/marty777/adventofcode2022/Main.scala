@@ -52,6 +52,7 @@ def logo: String = {
 		case 12 => Day12
 		case 13 => Day13
 		case 14 => Day14
+		case 15 => Day15
 		case _ => {
 			println(s"Puzzle day $day has not been implemented yet")
 			usage
