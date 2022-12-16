@@ -31,6 +31,7 @@ object Day16 extends PuzzleDay[Seq[Valve], Seq[Valve], Long, Long] {
 			}
 		}
 		// find the best possible pressure release by traversing the valves and opening the important ones.
+		//dijkstra_ReleasePressure(valveMap, importantValves, pathMap, isPart1 = true)
 		dijkstra_ReleasePressure(valveMap, importantValves, pathMap, isPart1 = true)
 	}
 	
@@ -61,13 +62,32 @@ object Day16 extends PuzzleDay[Seq[Valve], Seq[Valve], Long, Long] {
 		if(importantValves.size > 6) {
 			println("This may take a few minutes...")
 		}
+		// Caching the best pressures for previously seen partitionings shouldn't 
+		// do better than halving the number of searches, but it's an improvement.
+		val cachedPressures:scala.collection.mutable.Map[String, Int] = scala.collection.mutable.Map()
 		val bitsMax = 1 << importantValves.size
 		var bestPressure = -1
 		for(bits <- 0 until bitsMax) {
 			var myValves:Seq[String] = importantValves.zipWithIndex.filter((v,i) => ((bits >> i) & 0x01) == 0).map(_._1)
 			var elephantValves:Seq[String] = importantValves.zipWithIndex.filter((v,i) => ((bits >> i) & 0x01) == 1).map(_._1)
-			var myPressure = dijkstra_ReleasePressure(valveMap, myValves, pathMap, isPart1 = false)
-			var elephantPressure = dijkstra_ReleasePressure(valveMap, elephantValves, pathMap, isPart1 = false)
+			val myKey = pressureKey(myValves)
+			val elephantKey = pressureKey(elephantValves)
+			var myPressure = 0
+			if(cachedPressures.contains(myKey)) {
+				myPressure = cachedPressures(myKey)
+			}
+			else {
+				myPressure = dijkstra_ReleasePressure(valveMap, myValves, pathMap, isPart1 = false)
+				cachedPressures(myKey) = myPressure
+			}
+			var elephantPressure = 0
+			if(cachedPressures.contains(elephantKey)) {
+				elephantPressure = cachedPressures(elephantKey)
+			}
+			else {
+				elephantPressure = dijkstra_ReleasePressure(valveMap, elephantValves, pathMap, isPart1 = false)
+				cachedPressures(elephantKey) = elephantPressure
+			}
 			if(myPressure + elephantPressure > bestPressure) {
 				bestPressure = myPressure + elephantPressure 
 			}
@@ -190,8 +210,11 @@ object Day16 extends PuzzleDay[Seq[Valve], Seq[Valve], Long, Long] {
 	}
 	
 	// dijkstra helper functions
-	def stateKey(visited: Seq[String], position:String): String = {
-		position + ":" + visited.sorted.mkString("")
+	def stateKey(openValves: Seq[String], position:String): String = {
+		position + ":" + openValves.sorted.mkString("")
+	}
+	def pressureKey(visited: Seq[String]): String = {
+		visited.sorted.mkString("")
 	}
 	def betterDist(collection: scala.collection.mutable.Map[String, Int], id:String, newDist:Int): Boolean = {
 		if(!collection.contains(id)) then true else collection(id) > newDist
