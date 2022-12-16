@@ -6,25 +6,19 @@ import com.marty777.util.FileLines.readLines
 
 object Day16Definitions {
 	case class Valve(id:String, flow:Int, tunnels:Seq[String])
-	case class State(valves: Map[String, Valve])
 	case class StateNode(pressure:Int, steps: Int, open:Seq[String], position:String)
-	case class ElephantNode(pressure:Int, steps: Int, open:Seq[String], elephantPosition:String, elephantDestination:String, myPosition:String, myDestination:String)
 }
 
 object Day16 extends PuzzleDay[Seq[Valve], Seq[Valve], Long, Long] {
 	override def parse1(inputPath: String): Seq[Valve] = readLines(inputPath).flatMap(parseValve)
 	override def parse2(inputPath: String): Seq[Valve] = parse1(inputPath)
-	
-	
-	// notes for later: Djikstra to establish all accessible nodes. Filter for important -> flow > 0. cache 
-	// path lengths between all accessible important nodes. Djikstra across scenarios for best
-	// route to 30 steps.
+
 	override def part1(valves: Seq[Valve]): Long = {
 		var valveMap:Map[String,Valve] = Map()
 		for(valve <- valves) {
 			valveMap = valveMap.updated(valve.id, valve)
 		}
-		// not all valves are accessible, and only some have flow > 0.
+		// Some valves may not be accessible, and only some are important (with flow > 0).
 		val accessible = dijkstra_Accessible(valveMap)
 		var importantValves:Seq[String] = Seq()
 		for(id <- accessible) {
@@ -41,11 +35,11 @@ object Day16 extends PuzzleDay[Seq[Valve], Seq[Valve], Long, Long] {
 				}
 			}
 		}
+		// find the best possible pressure release by traversing the valves and opening the important ones.
 		dijkstra_ReleasePressure(valveMap, importantValves, pathMap, isPart1 = true)
 	}
 	
 	override def part2(valves: Seq[Valve]): Long = {
-		
 		var valveMap:Map[String,Valve] = Map()
 		for(valve <- valves) {
 			valveMap = valveMap.updated(valve.id, valve)
@@ -70,12 +64,13 @@ object Day16 extends PuzzleDay[Seq[Valve], Seq[Valve], Long, Long] {
 			}
 		}
 		
-		// The movement of the elephant and the player are independant.
-		// Split the list of important valves between the elephant and the player
-		// in all possible partitionings. Add the best pressure released by the 
-		// player and the elephant by opening their separate sets of goal valves. 
-		// Find the best result over all partitions of the important valves
-		// This isn't quick, but it works.
+		// Not very speedy, but this will finish in reasonable time.
+		// The elephant and the player can be considered seperately.
+		// Take the list of important (flow > 0) valves. Find all distinct ways
+		// to partition them between the elephant and the player.
+		// For each partitioning, find the best pressure result for an actor
+		// opening each set of important valves. Continue until all possible 
+		// partitionings have been examined. Return the best result.
 		val bitsMax = 1 << importantValves.size
 		var bestPressure = -1
 		for(bits <- 0 until bitsMax) {
