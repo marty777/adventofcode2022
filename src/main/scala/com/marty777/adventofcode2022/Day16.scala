@@ -20,12 +20,7 @@ object Day16 extends PuzzleDay[Seq[Valve], Seq[Valve], Long, Long] {
 		}
 		// Some valves may not be accessible, and only some are important (with flow > 0).
 		val accessible = dijkstra_Accessible(valveMap)
-		var importantValves:Seq[String] = Seq()
-		for(id <- accessible) {
-			if(valveMap(id).flow > 0) {
-				importantValves = importantValves :+ id
-			}
-		}
+		val importantValves:Seq[String] = accessible.filter(v => valveMap(v).flow > 0)
 		// build a cache of distances between all accessible valves
 		var pathMap:Map[(String,String),Int] = Map()
 		for(i <- 0 until accessible.size) {
@@ -45,16 +40,7 @@ object Day16 extends PuzzleDay[Seq[Valve], Seq[Valve], Long, Long] {
 			valveMap = valveMap.updated(valve.id, valve)
 		}
 		val accessible = dijkstra_Accessible(valveMap)
-		var importantValves:Seq[String] = Seq()
-		for(id <- accessible) {
-			if(valveMap(id).flow > 0) {
-				importantValves = importantValves :+ id
-			}
-		}
-		if(importantValves.size > 6) {
-			println("This may take a few minutes...")
-		}
-		
+		val importantValves:Seq[String] = accessible.filter(v => valveMap(v).flow > 0)
 		var pathMap:Map[(String,String),Int] = Map()
 		for(i <- 0 until accessible.size) {
 			for(j <- 0 until accessible.size) {
@@ -71,26 +57,20 @@ object Day16 extends PuzzleDay[Seq[Valve], Seq[Valve], Long, Long] {
 		// For each partitioning, find the best pressure result for an actor
 		// opening each set of important valves. Continue until all possible 
 		// partitionings have been examined. Return the best result.
+		
+		if(importantValves.size > 6) {
+			println("This may take a few minutes...")
+		}
 		val bitsMax = 1 << importantValves.size
 		var bestPressure = -1
 		for(bits <- 0 until bitsMax) {
-			var myValves:Seq[String] = Seq()
-			var elephantValves:Seq[String] = Seq()
-			for(i <- 0 until importantValves.size) {
-				val choice = (bits >> (i)) & 0x01
-				if(choice == 0) {
-					myValves = myValves :+ importantValves(i)
-				}
-				else {
-					elephantValves = elephantValves :+ importantValves(i)
-				}
-			}
+			var myValves:Seq[String] = importantValves.zipWithIndex.filter((v,i) => ((bits >> i) & 0x01) == 0).map(_._1)
+			var elephantValves:Seq[String] = importantValves.zipWithIndex.filter((v,i) => ((bits >> i) & 0x01) == 1).map(_._1)
 			var myPressure = dijkstra_ReleasePressure(valveMap, myValves, pathMap, isPart1 = false)
 			var elephantPressure = dijkstra_ReleasePressure(valveMap, elephantValves, pathMap, isPart1 = false)
 			if(myPressure + elephantPressure > bestPressure) {
 				bestPressure = myPressure + elephantPressure 
 			}
-			
 		}
 		bestPressure
 	}
@@ -99,17 +79,13 @@ object Day16 extends PuzzleDay[Seq[Valve], Seq[Valve], Long, Long] {
 		val valvePlural = "Valve (.*) has flow rate=(.*); tunnels lead to valves (.*)".r
 		val valveSingular = "Valve (.*) has flow rate=(.*); tunnel leads to valve (.*)".r
 		input match {
-			case valvePlural(id, flowRate, list) => {
-				val tunnels = list.split(", ").toSeq
-				Some(Valve(id, flowRate.toInt, tunnels))
+			case valvePlural(id, flowRate, tunnels) => {
+				Some(Valve(id, flowRate.toInt, tunnels.split(", ").toSeq))
 			}
 			case valveSingular(id, flowRate, tunnel) => {
-				val tunnels = Seq(tunnel)
-				Some(Valve(id, flowRate.toInt, tunnels))
+				Some(Valve(id, flowRate.toInt, Seq(tunnel)))
 			}
-			case _ => {
-				None
-			}
+			case _ => None
 		}
 	}
 	
