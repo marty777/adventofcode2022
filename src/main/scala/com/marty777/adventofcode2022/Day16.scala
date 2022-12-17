@@ -31,7 +31,6 @@ object Day16 extends PuzzleDay[Seq[Valve], Seq[Valve], Long, Long] {
 			}
 		}
 		// find the best possible pressure release by traversing the valves and opening the important ones.
-		//dijkstra_ReleasePressure(valveMap, importantValves, pathMap, isPart1 = true)
 		dijkstra_ReleasePressure(valveMap, importantValves, pathMap, isPart1 = true)
 	}
 	
