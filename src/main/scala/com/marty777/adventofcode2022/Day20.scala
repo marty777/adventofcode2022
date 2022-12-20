@@ -19,7 +19,7 @@ object Day20 extends PuzzleDay[Seq[Long], Seq[Long], Long, Long] {
 			nodes += Node(inputs(i),i)
 		}
 		mix(nodes, inputs)
-		valueAt(nodes, 1000, zeroIndex) + valueAt(nodes, 2000, zeroIndex) + valueAt(nodes, 3000, zeroIndex)
+		groveCoordinates(nodes, zeroIndex)
 	}
 	
 	override def part2(inputs: Seq[Long]): Long =  {
@@ -33,7 +33,7 @@ object Day20 extends PuzzleDay[Seq[Long], Seq[Long], Long, Long] {
 		for(i <- 1 to 10) {
 			mix(nodes, decryptedInputs)
 		}
-		valueAt(nodes, 1000, zeroIndex) + valueAt(nodes, 2000, zeroIndex) + valueAt(nodes, 3000, zeroIndex)
+		groveCoordinates(nodes, zeroIndex)
 	}
 	
 	def mix(nodes:scala.collection.mutable.ListBuffer[Node], inputs:Seq[Long]) = {
@@ -45,27 +45,23 @@ object Day20 extends PuzzleDay[Seq[Long], Seq[Long], Long, Long] {
 	def move(nodes: scala.collection.mutable.ListBuffer[Node], originalIndex:Int, originalValue:Long) = {
 		val atIndex = nodes.indexOf(Node(originalValue, originalIndex))
 		val v = nodes(atIndex)
-		val size = nodes.size
-		var nextIndex = (atIndex + v.value) % (nodes.size - 1) // modulo size - 1 because we're moving over the list after removing one element
-		// because we're "moving" the node, if going backwards go to the end of the list
-		// instead of the front if the destination index is zero
-		if(v.value < 0 && nextIndex == 0) {
-			nodes.remove(atIndex)
-			nodes += v
+		// modulo size - 1 because we're moving over the list after removing one element
+		var nextIndex = (atIndex + v.value) % (nodes.size - 1) 
+		if(nextIndex < 0) {
+			nextIndex += (nodes.size - 1)
 		}
-		else {
-			if(nextIndex < 0) {
-				nextIndex += (nodes.size - 1)
-			}
-			nodes.remove(atIndex)
-			nodes.insert(nextIndex.toInt,v)
-		}
+		nodes.remove(atIndex)
+		nodes.insert(nextIndex.toInt,v)
+	}
+	
+	def groveCoordinates(nodes: scala.collection.mutable.ListBuffer[Node], zeroIndex:Int): Long = {
+		valueAt(nodes, 1000, zeroIndex) + valueAt(nodes, 2000, zeroIndex) + valueAt(nodes, 3000, zeroIndex)
 	}
 	
 	def valueAt(nodes: scala.collection.mutable.ListBuffer[Node], index:Int, zeroIndex:Int):Long = {
 		val zeroPosition = nodes.indexOf(Node(0, zeroIndex))
-		val index1 = (index + zeroPosition)  % nodes.size
-		nodes(index1).value
+		val zeroIndexed = (index + zeroPosition)  % nodes.size
+		nodes(zeroIndexed).value
 	}
 }
 
