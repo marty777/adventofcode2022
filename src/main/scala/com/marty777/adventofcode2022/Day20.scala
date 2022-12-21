@@ -14,7 +14,7 @@ object Day20 extends PuzzleDay[Seq[Long], Seq[Long], Long, Long] {
 
 	override def part1(inputs: Seq[Long]): Long =  {
 		val zeroIndex = inputs.indexOf(0)
-		val nodes:scala.collection.mutable.ListBuffer[Node] = scala.collection.mutable.ListBuffer.empty[Node]
+		val nodes = scala.collection.mutable.ListBuffer.empty[Node]
 		for(i <- 0 until inputs.size) {
 			nodes += Node(inputs(i),i)
 		}
@@ -26,7 +26,7 @@ object Day20 extends PuzzleDay[Seq[Long], Seq[Long], Long, Long] {
 		val key:Long = 811589153
 		val zeroIndex = inputs.indexOf(0)
 		val decryptedInputs = inputs.map(_ * key)
-		val nodes:scala.collection.mutable.ListBuffer[Node] = scala.collection.mutable.ListBuffer.empty[Node]
+		val nodes = scala.collection.mutable.ListBuffer.empty[Node]
 		for(i <- 0 until decryptedInputs.size) {
 			nodes += Node(decryptedInputs(i),i)
 		}
