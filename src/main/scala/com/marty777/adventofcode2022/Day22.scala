@@ -7,7 +7,6 @@ import com.marty777.util.FileLines.readLines
 object Day22Definitions {
 	case class Coord(x:Int, y:Int)
 	case class Coord3(var x:Int, var y:Int, var  z:Int)
-	//case class MapNode(position:Coord, isObstacle:Boolean)
 	case class Instruction(amt:Int, isDir:Boolean, dir:String)
 	case class State(grid: collection.mutable.Map[Coord, Boolean], instructions:Seq[Instruction], width:Int, height:Int)
 	// faceX, faceY are the directions of the x and y vectors in input space (i.e. left to right and up to down) mapped into 3d coordinates
@@ -133,13 +132,6 @@ object Day22 extends PuzzleDay[Seq[String], Seq[String], Long, Long] {
 	def facePosToInputPos(facePos:Coord, faceIndex:Int, cube:Cube): Coord = {
 		Coord(facePos.x + cube.faces(faceIndex).inputSpaceStart.x, facePos.y + cube.faces(faceIndex).inputSpaceStart.y)
 	}
-	
-	// def mapToDim(value:Int, dimMax:Int):Int = {
-		// if(value != 1 && value != -1) {
-			// throw Exception(s"Incorrect usage of mapToDim with value $value")
-		// }
-		// if(value == -1) then 0 else dimMax
-	// }
 	
 	def facePosToCubeCoord(cube:Cube, faceIndex:Int, facePos:Coord):Coord3 = {
 		var total = Coord3(0,0,0)
